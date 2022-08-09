@@ -262,3 +262,5 @@ library("MASS")
 
 model_fit <- polr(as.factor(PV1READ)~GCSELFEFF+ST001D01T+ST004D01T, data = pisa.de, Hess = TRUE)
 summary(model_fit)
+
+#test_iveta
