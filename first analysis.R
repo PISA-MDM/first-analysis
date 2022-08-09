@@ -264,3 +264,5 @@ model_fit <- polr(as.factor(PV1READ)~GCSELFEFF+ST001D01T+ST004D01T, data = pisa.
 summary(model_fit)
 
 #test_iveta
+
+#test_iveta2
