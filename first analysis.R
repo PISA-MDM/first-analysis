@@ -75,7 +75,7 @@ pisa.var.label(folder = "C:/Users/isr/Desktop/Training IPSDS/Master project/pisa
 # Import PISA Data
 start_time <- Sys.time()
 
-
+#shall sdd student/school id???????????????????????
 pisa.de <- pisa.select.merge(folder = "C:/Users/isr/Desktop/Training IPSDS/Master project/pisa2018/data",
                              school.file = "CY07_MSU_SCH_QQQ.sav",
                              student.file = "CY07_MSU_STU_QQQ.sav",
@@ -97,6 +97,7 @@ pisa.de <- pisa.select.merge(folder = "C:/Users/isr/Desktop/Training IPSDS/Maste
                                         "RESPECT",#Respect for people from other cultures (WLE)
                                         "GLOBMIND",#Global-mindedness (WLE)
                                         "ATTIMM",#Student's attitudes towards immigrants (WLE)
+                                        "w_fstuwt",
                                         "PV1READ" , "PV2READ", "PV3READ", "PV4READ", "PV5READ" , "PV6READ", "PV7READ", "PV8READ", "PV9READ" , "PV10READ"),
                              
                              school = c(
@@ -140,14 +141,25 @@ pander(props_tab4,
        caption = "Frequency table Student gender. Data: PISA2018")
 # 
 # 
-# 
-# # Calculating mean
+# ##################################### 2 descriptive statistics of project variables#########################################
+# # Calculating mean????????????????????
 pisa.mean(variable = "HISEI", data = pisa.de)
 pisa.mean(variable = "HISEI", data = pisa.de, by = "CNTRYID")
+pisa.mean(variable = "ST001D01T", data = pisa.de)
+pisa.mean(variable = "IMMIG", data = pisa.de)
+pisa.mean(variable = "GCSELFEFF", data = pisa.de)
+pisa.mean(variable = "GCAWARE", data = pisa.de)
+#pisa.mean(variable = "GCSELFEFF", data = pisa.de)
+pisa.mean(variable = "GLOBMIND", data = pisa.de)
+#pisa.mean(variable = "GCSELFEFF", data = pisa.de)
 # 
 # 
 # # Calculate Average student Performance????????????????????????????????????????
-pisa.de$mean.pv <- pisa.mean.pv(pvlabel = "READ",data = pisa.de)
+
+mean.pv.gender <- pisa.mean.pv(pvlabel = "READ", 
+                               data = pisa.de,
+                               by = c("ST004D01T"))
+
 # 
 # # Average performance resutls by Grade/Sex
 mean.pv <- pisa.mean.pv(pvlabel = "READ", 
@@ -165,7 +177,7 @@ mean.pv <- pisa.mean.pv(pvlabel = "READ",
 pisa.table(variable = "SCHLTYPE", data = pisa.de)
 pisa.table(variable = "SC013Q01TA", data = pisa.de)
 # 
-#
+#??????????? how the scales are compiled for GCSELFEFF
 pisa.table(variable = "GCSELFEFF", data = pisa.de)
 
 #
@@ -181,7 +193,7 @@ hist(pisa.de$PV1READ)
 # corr plot
 
 #ggplot(pisa.de, aes(y=GCSELFEFF, x=pisa.mean.pv))  + 
- # geom_point()
+# geom_point()
 
 
 ggplot(pisa.de, aes(x=GCSELFEFF, y=PV1READ)) + 
@@ -208,7 +220,7 @@ ggplot(pisa.de, aes(x=GCSELFEFF, y=PV1READ)) +
   geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) +
   annotate("text", x = 4, y = 700, label = paste0("R: ", round(cor_coefs$estimate, 2))) +
   annotate("text", x = 4, y = 800, label = paste0("p-value: ", round(cor_coefs$p.value, 10))) #+
-  #facet_grid(~  CNTSCHID) 
+#facet_grid(~  CNTSCHID) 
 
 #
 
@@ -239,6 +251,20 @@ ggplot(pisa.de, aes(x = PV1READ, y = GCSELFEFF, fill = ST001D01T)) +
 "ATTIMM",#Student's attitudes towards immigrants (WLE)
 "PV1READ"
 
+# ordinar
+ols <- lm(PV1READ ~ GCSELFEFF, pisa.de)
+summary(ols)
+r <- residuals(ols)
+hist(r)
+
+ks.test(residuals(ols), y = "pnorm", sd=sd(residuals(ols)))
+
+# weighted lm
+pisa.de$W_FSTUWT
+
+wt <- lm(formula = PV1READ ~ GCSELFEFF, data = pisa.de, weights =  W_FSTUWT)
+summary(wt)
+
 #(a) unweighted Logistic model : Use the covariates global, sex, hisp, and race.
 m.logit <- glm(formula = PV1READ ~ GCSELFEFF + as.factor(ST001D01T) + as.factor(ST004D01T) +
                  as.factor(IMMIG), family=binomial(link="logit"), data=pisa.de)
@@ -259,9 +285,6 @@ summary(m.probit)
 install.packages("MASS")
 library("MASS")
 
-
-model_fit <- polr(as.factor(PV1READ)~GCSELFEFF+ST001D01T+ST004D01T, data = pisa.de, Hess = TRUE)
-summary(model_fit)
 
 #test_iveta
 
