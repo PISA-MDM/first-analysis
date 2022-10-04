@@ -1,2 +1,2 @@
 # first-analysis
-exploratory and first models
+exploratory, descriptive stats and plots
